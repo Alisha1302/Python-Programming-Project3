@@ -1,0 +1,103 @@
+import json
+from collections import defaultdict
+
+# Global list to store expenses
+expenses = []
+
+# Predefined categories
+categories = ["Food", "Transport", "Entertainment","Clothes","Bills", "Utilities", "Miscellaneous"]
+
+def add_expense():
+    """Function to add a new expense."""
+    try:
+        amount = float(input("Enter the amount: "))
+        description = input("Enter the description: ")
+        category = input(f"Enter the category ({', '.join(categories)}): ")
+        date = input("Enter the date (YYYY-MM-DD): ")
+        expense = {
+            "amount": amount,
+            "description": description,
+            "category": category,
+            "date": date
+        }
+        expenses.append(expense)
+        print("Expense added successfully.")
+    except ValueError:
+        print("Invalid amount. Please enter a number.")
+        return
+
+def save_expenses():
+    """Function to save expenses to a file."""
+    try:
+        with open('expenses.json', 'w') as file:
+            json.dump(expenses, file)
+        print("Expenses saved successfully.")
+    except IOError:
+        print("Error saving expenses.")
+
+def load_expenses():
+    """Function to load expenses from a file."""
+    global expenses
+    try:
+        with open('expenses.json', 'r') as file:
+            expenses = json.load(file)
+    except FileNotFoundError:
+        expenses = []
+
+def monthly_summary():
+    """Function to print a summary of expenses by month."""
+    summary = defaultdict(float)
+    for expense in expenses:
+        month = expense['date'][:7]
+        summary[month] += expense['amount']
+    print("\nMonthly Summary:")
+    for month, total in summary.items():
+        print(f"{month}: ${total:.2f}")
+
+def category_summary():
+    """Function to print a summary of expenses by category."""
+    summary = defaultdict(float)
+    for expense in expenses:
+        summary[expense['category']] += expense['amount']
+    print("\nCategory Summary:")
+    for category, total in summary.items():
+        print(f"{category}: ${total:.2f}")
+
+def description_summary():
+    """Function to print a detailed summary of all expenses."""
+    if not expenses:
+        print("No expenses recorded yet.")
+        return
+
+    print("\nDescription Summary:")
+    for expense in expenses:
+        print(f"Amount: ${expense['amount']:.2f}, Description: {expense['description']}, "
+              f"Category: {expense['category']}, Date: {expense['date']}")
+
+def menu():
+    """Function to display the main menu and handle user input."""
+    while True:
+        print("\nExpense Tracker Menu")
+        print("1. Add Expense")
+        print("2. View Monthly Summary")
+        print("3. View Category Summary")
+        print("4. View Description Summary")
+        print("5. Save & Exit")
+        choice = input("Choose an option: ")
+        if choice == '1':
+            add_expense()
+        elif choice == '2':
+            monthly_summary()
+        elif choice == '3':
+            category_summary()
+        elif choice == '4':
+            description_summary()
+        elif choice == '5':
+            save_expenses()
+            break
+        else:
+            print("Invalid option, please try again.")
+
+if __name__ == "__main__":
+    load_expenses()
+    menu()
